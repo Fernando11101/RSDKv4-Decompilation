@@ -33,12 +33,15 @@ jobs:
         run: vcpkg install glew sdl2 libogg libvorbis --triplet=x86-windows-static
       - name: Build RSDKv4
         run: |
-          cmake -B build ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN32_FLAGS}}
-          cmake --build build --parallel --config Release
+          cmake -B build_hw ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN32_FLAGS}}
+          cmake --build build_hw --parallel --config Release
+          cmake -B build_sw ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN32_FLAGS}} -DRETRO_USE_HW_RENDER=off
+          cmake --build build_sw --parallel --config Release
       - name: Move artifacts
         run: |
           mkdir artifacts
-          mv ./build/Release/*.exe ./artifacts
+          mv ./build_hw/Release/RSDKv4.exe ./artifacts/RSDKv4_hw.exe
+          mv ./build_sw/Release/RSDKv4.exe ./artifacts/RSDKv4_sw.exe
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -55,12 +58,15 @@ jobs:
         run: vcpkg install glew sdl2 libogg libvorbis --triplet=x64-windows-static
       - name: Build RSDKv4
         run: |
-          cmake -B build ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN64_FLAGS}}
-          cmake --build build --parallel --config Release
+          cmake -B build_hw ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN64_FLAGS}}
+          cmake --build build_hw --parallel --config Release
+          cmake -B build_sw ${{env.GENERAL_FLAGS}} ${{env.GENERAL_WIN_FLAGS}} ${{env.WIN64_FLAGS}} -DRETRO_USE_HW_RENDER=off
+          cmake --build build_sw --parallel --config Release
       - name: Move artifacts
         run: |
           mkdir artifacts
-          mv ./build/Release/*.exe ./artifacts
+          mv ./build_hw/Release/RSDKv4.exe ./artifacts/RSDKv4_hw.exe
+          mv ./build_sw/Release/RSDKv4.exe ./artifacts/RSDKv4_sw.exe
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -129,14 +135,17 @@ jobs:
           sudo apt-get install libglew-dev libglfw3-dev libsdl2-dev libogg-dev libvorbis-dev
       - name: Build RSDKv4
         run: |
-          cmake -B build ${{env.GENERAL_FLAGS}} ${{env.GENERAL_LINUX_FLAGS}}
-          cmake --build build --parallel
+          cmake -B build_hw ${{env.GENERAL_FLAGS}} ${{env.GENERAL_LINUX_FLAGS}}
+          cmake --build build_hw --parallel
+          cmake -B build_sw ${{env.GENERAL_FLAGS}} ${{env.GENERAL_LINUX_FLAGS}} -DRETRO_USE_HW_RENDER=off
+          cmake --build build_sw --parallel
       # tar the executables so that they don't lose exec permissions
       # see: https://github.com/actions/upload-artifact?tab=readme-ov-file#permission-loss
       - name: Move artifacts
         run: |
           mkdir artifacts
-          mv ./build/RSDKv4* ./artifacts
+          mv ./build_hw/RSDKv4 ./artifacts/RSDKv4_hw
+          mv ./build_sw/RSDKv4 ./artifacts/RSDKv4_sw
           tar -czvf linux.tar.gz -C ./artifacts .
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
